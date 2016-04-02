@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<div style="position:absolute;background: #449d44;border-radius: 100%;height: 50px;width: 50px" id="div"></div>
+<script>
+    //    缓动算法
+    var tween = {
+        linear: function (t, b, c, d) {
+            return c * t / d + b;
+        },
+        easeIn: function (t, b, c, d) {
+            return c * (t /= d) * t + b;
+        },
+        strongEaseIn: function (t, b, c, d) {
+            return c * (t /= d) * t * t * t * t + b;
+        }
+    };
+    var Animate = function (dom) {
+        this.dom = dom;//进行的Dom节点
+        this.startTime = 0;//动画开始是时间
+        this.startPos = 0;//动画开始时,dom节点的位置,即dom的初始位置
+        this.endPos = 0;//动画结束时,dom节点的位置,即dom的结束位置
+        this.propertyName = null;//dom节点需要被改变的css属性
+        this.easing = null;//缓动效果算法
+        this.duration = null;//动画持续时间
+    }
+    /**
+     * 使用策略模式实现欢动动画
+     * @param propertyName 需要改变的css属性
+     * @param endPos       Dom节点结束位置
+     * @param duration     动画持续时间
+     * @param easing       缓动效果算法
+     */
+    Animate.prototype.start = function (propertyName, endPos, duration, easing) {
+        this.startTime = +new Date;//动画启动时间(+new Date是强制转成数字即是时间戳 )
+        this.startPos = this.dom.getBoundingClientRect()[propertyName];//dom节点初始位置
+        this.propertyName = propertyName;//dom节点需要被改变的css属性
+        this.endPos = endPos;//dom节点目标位置
+        this.duration = duration;//动画持续时间
+        this.easing = tween[easing];//欢动效果算法
+
+        var self = this;
+        var timeId = setInterval(function () {//启动定时器,开始执行动画
+            if (self.step() === false) {//动画结束时,清除定时器
+                clearInterval(timeId);
+            }
+        }, 19);
+
+    }
+    Animate.prototype.step = function () {
+        var t = +new Date;//取得当前时间
+        if (t >= this.startTime + this.duration) {//当开始时间加上动画持续时间之和小于或者等于当前时间说明动画已经结束
+            this.update(this.endPos);
+            return false;
+        }
+        var pos = this.easing(t - this.startTime, this.startPos, this.endPos - this.startPos, this.duration);//pos为小球位移值
+        this.update(pos);//更新位置
+    }
+    Animate.prototype.update = function (pos) {//改变dom CSS信息
+        this.dom.style[this.propertyName] = pos + 'px';
+    }
+
+
+    var div = document.getElementById('div');
+    var animate = new Animate(div);
+    setTimeout(function () {
+        animate.start('left', 500, 1000, 'strongEaseIn');
+    }, 1000)
+
+</script>
+</body>
+</html>
