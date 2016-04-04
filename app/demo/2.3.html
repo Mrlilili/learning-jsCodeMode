@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<span id="test">123</span>
+<script>
+    var dom = document.getElementById('test');
+    var a = 8989;
+    var t = {
+        a:123,
+        b:456
+    };
+    var z = function(){
+        console.log(this)
+        console.log(this.a);
+    }
+    dom.onclick = function(){
+        z.call(t);
+
+    };
+</script>
+</body>
+</html>

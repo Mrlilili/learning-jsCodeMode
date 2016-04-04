@@ -1,0 +1,72 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+</head>
+<body>
+<h1>表单验证第一个版本</h1>
+
+<form id="registerForm">
+    请输入用户名: <input type="text" name="userName">
+    请输入密码: <input type="text" name="password">
+    请输入手机号: <input type="text" name="phoneNumber">
+    <span>提交</span>
+</form>
+
+<script>
+    var strategies = {
+        isNonEmpty: function (value, errorMsg) {
+            console.log(value,errorMsg);
+            console.log(this,'123');
+            if (value === '') {
+                return errorMsg;
+            }
+        },
+        minLength: function (value, length, errorMsg) {
+            if (value.length < length) {
+                return errorMsg;
+            }
+        }
+    };
+    var Validator = function () {
+        this.cache = [];
+    };
+    Validator.prototype.add = function (dom, rule, errorMsg) {
+        var ary = rule.split(':');
+        this.cache.push(function () {
+            var strategy = ary.shift();
+            ary.unshift(dom.value);
+            ary.push(errorMsg);
+            return strategies[strategy].apply(Validator, ary);
+        });
+    };
+    Validator.prototype.start = function () {
+        for (var i = 0, validatorFunc; validatorFunc = this.cache[i++];) {
+            var msg = validatorFunc();
+            if (msg) {
+                return msg;
+            }
+        }
+    };
+    var validataFuc = function () {
+        var validator = new Validator();
+        validator.add(registerForm.userName,'isNonEmpty','用户名不能为空');
+        validator.add(registerForm.password,'minLength:4','不能小于4位');
+
+        var errorMsg = validator.start();
+        return errorMsg;
+    };
+    var registerForm = document.getElementById('registerForm');
+
+    registerForm.onclick = function () {
+        var errorMsg = validataFuc();
+        if (errorMsg) {
+            alert(errorMsg);
+            return false;
+        }
+        return false;
+    };
+</script>
+</body>
+</html>
